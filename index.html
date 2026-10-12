@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101713">
+<meta name="description" content="Offline-first beginner barbell workout planner.">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>IronStart — Workout Planner</title>
+<style>
+:root{color-scheme:dark;--bg:#101713;--panel:#19231d;--panel2:#202d25;--text:#f1f5f0;--muted:#a9b7ac;--line:#334239;--accent:#c7f36b;--danger:#ff9d90;--radius:18px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input,select{font:inherit}button{cursor:pointer}
+.app{max-width:720px;margin:0 auto;padding:env(safe-area-inset-top) 16px calc(96px + env(safe-area-inset-bottom))}
+header{padding:22px 2px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:850;letter-spacing:-.04em;font-size:24px}.brand span{color:var(--accent)}.sub{color:var(--muted);font-size:13px}
+.pill{border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:12px}
+nav{position:fixed;z-index:5;bottom:0;left:0;right:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#101713ee;backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px}
+nav button{max-width:170px;flex:1;background:transparent;color:var(--muted);border:0;border-radius:12px;padding:10px 4px;font-size:12px}nav button.active{background:var(--panel2);color:var(--accent)}
+nav .navicon{display:block;font-size:18px;margin-bottom:2px}
+h1{font-size:30px;line-height:1.1;letter-spacing:-.04em;margin:6px 0 8px}h2{font-size:20px;letter-spacing:-.02em;margin:0 0 12px}h3{font-size:16px;margin:0}
+p{margin:6px 0;color:var(--muted)}.screen{display:none}.screen.active{display:block}
+.hero{background:linear-gradient(145deg,#26392a,#19231d 70%);border:1px solid #3d5540;border-radius:24px;padding:20px;margin:10px 0 16px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.stack{display:grid;gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0}
+.muted{color:var(--muted)}.small{font-size:13px}.accent{color:var(--accent)}.big{font-size:34px;font-weight:850;letter-spacing:-.05em}.btn{border:0;border-radius:13px;background:var(--accent);color:#172015;font-weight:800;padding:13px 16px;min-height:48px}.btn.secondary{background:var(--panel2);border:1px solid var(--line);color:var(--text)}.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}.btn.danger{background:#472a28;color:#ffd5cf}.btn:disabled{opacity:.4;cursor:not-allowed}.full{width:100%}
+.exercise{border:1px solid var(--line);background:#141d17;border-radius:16px;padding:14px;margin:10px 0}.exercise-top{display:flex;justify-content:space-between;gap:10px;align-items:start}.tag{font-size:11px;color:var(--accent);border:1px solid #4c643d;border-radius:999px;padding:4px 7px;white-space:nowrap}
+.controls{display:flex;align-items:center;gap:8px;margin-top:12px}.controls button{width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);font-size:20px}.weight{font-size:23px;font-weight:800;min-width:88px;text-align:center}.controls input{min-width:0;width:78px;background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:10px;border-radius:10px;text-align:center}
+.sets{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}.setbox{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 10px;color:var(--muted);font-size:12px}.setbox.done{background:#2e4224;color:var(--accent);border-color:#607e47}
+.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:13px;color:var(--muted)}.field input,.field select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:var(--panel2);border-radius:14px;padding:14px}.metric strong{display:block;font-size:24px}.listitem{padding:12px 0;border-bottom:1px solid var(--line)}.listitem:last-child{border:0}
+.notice{border-left:3px solid var(--accent);padding:10px 12px;background:#202b20;border-radius:0 10px 10px 0;color:var(--muted);font-size:13px;margin:12px 0}
+.timer{font-size:42px;font-weight:850;letter-spacing:-.04em;text-align:center;padding:12px}
+.toast{position:fixed;z-index:10;bottom:88px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:999px;display:none;white-space:nowrap}
+@media(min-width:600px){.app{padding-top:16px}.hero{padding:26px}.exercise{padding:18px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div><div class="brand">IRON<span>START</span></div><div class="sub">Your strength plan, built one session at a time</div></div><div class="pill" id="offlineBadge">● Offline ready</div></header>
+
+<section id="home" class="screen active">
+  <div class="hero">
+    <div class="row"><span class="pill">BEGINNER · HYBRID 5×5</span><span class="accent" id="nextLabel">NEXT UP</span></div>
+    <h1 id="homeTitle">Your next workout</h1>
+    <p id="homeDesc">Build consistency. Add weight when you earn it.</p>
+    <div class="row" style="margin:18px 0"><div><div class="sub">NEXT SESSION</div><div class="big" id="nextWorkout">Workout A</div></div><div style="text-align:right"><div class="sub">EST. TIME</div><div class="big">45–60<span style="font-size:16px">m</span></div></div></div>
+    <button class="btn full" id="startBtn">Start workout →</button>
+  </div>
+  <div class="grid2">
+    <div class="metric"><span class="sub">SESSIONS LOGGED</span><strong id="sessionCount">0</strong><span class="small muted">Keep showing up</span></div>
+    <div class="metric"><span class="sub">CURRENT STREAK</span><strong id="streakCount">0</strong><span class="small muted">consecutive sessions</span></div>
+  </div>
+  <div class="card"><div class="row"><h2>How your plan works</h2><span class="accent">A / B</span></div><p>Train three non-consecutive days a week, alternating A and B. Keep the first weeks easy while you learn good technique.</p><div class="notice">This is a conservative beginner template, not a medical or coaching assessment. Ask a qualified coach to check your technique, and stop if you feel sharp pain.</div></div>
+</section>
+
+<section id="workout" class="screen">
+  <div class="row"><div><div class="sub">TODAY'S SESSION</div><h1 id="workoutHeading">Workout A</h1></div><button class="btn ghost" id="cancelBtn">Exit</button></div>
+  <p id="workoutSubtitle">Log the work you complete. You can adjust loads before each exercise.</p>
+  <div id="exerciseList"></div>
+  <div class="card">
+    <div class="row"><div><h2>Rest timer</h2><p class="small">A simple between-set timer</p></div><div class="timer" id="timerText">02:00</div></div>
+    <div class="grid2"><button class="btn secondary" id="timerStart">Start 2 min</button><button class="btn ghost" id="timerReset">Reset</button></div>
+  </div>
+  <div class="field"><label for="sessionNote">Session notes (optional)</label><input id="sessionNote" placeholder="Energy, technique notes…"></div>
+  <button class="btn full" id="finishBtn">Finish and save session</button>
+  <p class="small" style="text-align:center;margin:12px">Save only when you've finished. Completed reps determine your next loads.</p>
+</section>
+
+<section id="history" class="screen">
+  <h1>Progress</h1><p>Your workout history stays on this device.</p>
+  <div class="grid2">
+    <div class="metric"><span class="sub">TOTAL SESSIONS</span><strong id="historyCount">0</strong></div>
+    <div class="metric"><span class="sub">LAST WORKOUT</span><strong id="lastWorkout" style="font-size:20px">—</strong></div>
+  </div>
+  <div class="card"><div class="row"><h2>Recent sessions</h2><button class="btn ghost" id="exportBtn">Export backup</button></div><div id="historyList"><p>No sessions yet. Your first workout will appear here.</p></div></div>
+  <div class="card"><h2>Progression rules</h2><div class="listitem"><strong>All target reps completed</strong><p class="small">Increase next time by the exercise's increment.</p></div><div class="listitem"><strong>Missed any target reps</strong><p class="small">Repeat the same load next time. Don't force bad reps.</p></div><div class="listitem"><strong>Missed the same lift 3 times</strong><p class="small">Consider a 10% reduction and review sleep, food, recovery and technique before building again.</p></div></div>
+</section>
+
+<section id="settings" class="screen">
+  <h1>Settings</h1><p>Set up the plan to match your equipment.</p>
+  <div class="card">
+    <div class="field"><label for="units">Weight units</label><select id="units"><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lb)</option></select></div>
+    <div class="field"><label for="barWeight">Bar weight (<span class="unitLabel">kg</span>)</label><input id="barWeight" type="number" min="1" step="0.5" value="20"></div>
+    <div class="field"><label for="increment">Smallest plate jump per side (<span class="unitLabel">kg</span>)</label><input id="increment" type="number" min="0.25" step="0.25" value="1.25"></div>
+    <div class="field"><label for="squatStart">Starting squat weight (<span class="unitLabel">kg</span>, total bar weight)</label><input id="squatStart" type="number" min="0" step="0.5" value="20"></div>
+    <div class="field"><label for="benchStart">Starting bench press weight (<span class="unitLabel">kg</span>, total bar weight)</label><input id="benchStart" type="number" min="0" step="0.5" value="20"></div>
+    <div class="field"><label for="pressStart">Starting overhead press weight (<span class="unitLabel">kg</span>, total bar weight)</label><input id="pressStart" type="number" min="0" step="0.5" value="15"></div>
+    <div class="field"><label for="deadStart">Starting deadlift weight (<span class="unitLabel">kg</span>, total bar weight)</label><input id="deadStart" type="number" min="0" step="0.5" value="30"></div>
+    <div class="field"><label for="rowStart">Starting row weight (<span class="unitLabel">kg</span>, total bar weight)</label><input id="rowStart" type="number" min="0" step="0.5" value="20"></div>
+    <button class="btn full" id="saveSettings">Save settings</button>
+    <p class="small">Suggested starts are deliberately light and are not a test of your maximum. Choose a load you can lift with controlled technique and no pain. Use lighter training bars or dumbbells if a standard bar is too heavy.</p>
+  </div>
+  <div class="card"><h2>Backup & reset</h2><p>Export your data regularly. Import a previous backup to restore it on this device.</p><div class="field"><label for="importFile">Import JSON backup</label><input type="file" id="importFile" accept="application/json,.json"></div><button class="btn danger full" id="resetBtn">Delete all local workout data</button></div>
+  <div class="card"><h2>About this programme</h2><p>This hybrid uses Starting Strength-style squat 3×5 and deadlift 1×5, with StrongLifts-style 5×5 bench, overhead press and barbell row. Workout A and B alternate. It is a practical template, not an exact reproduction of either official programme.</p></div>
+</section>
+</div>
+<nav>
+<button class="active" data-screen="home"><span class="navicon">⌂</span>Home</button>
+<button data-screen="workout"><span class="navicon">▤</span>Workout</button>
+<button data-screen="history"><span class="navicon">↗</span>Progress</button>
+<button data-screen="settings"><span class="navicon">⚙</span>Settings</button>
+</nav>
+<div class="toast" id="toast"></div>
+<script>
+const $ = id => document.getElementById(id);
+const DBKEY='ironstart-data-v1';
+const defaultState={
+ settings:{units:'kg',barWeight:20,increment:1.25,starts:{squat:20,bench:20,press:15,deadlift:30,row:20}},
+ next:'A', sessions:[], loads:{squat:20,bench:20,press:15,deadlift:30,row:20}, failures:{squat:0,bench:0,press:0,deadlift:0,row:0}
+};
+let state=loadState(), activeSession=null, timerInterval=null, timerRemaining=120;
+const exercises={
+ squat:{name:'Barbell squat',sets:3,reps:5,inc:2.5,failInc:2.5,rest:180,tip:'Brace your trunk, control the descent and use a pain-free range of motion.'},
+ bench:{name:'Bench press',sets:5,reps:5,inc:2.5,failInc:1.25,rest:180,tip:'Keep shoulders stable and use a spotter or safety arms.'},
+ press:{name:'Overhead press',sets:5,reps:5,inc:1.25,failInc:1.25,rest:180,tip:'Keep ribs down and avoid leaning back to finish reps.'},
+ deadlift:{name:'Deadlift',sets:1,reps:5,inc:5,failInc:2.5,rest:210,tip:'Keep the bar close and reset your position between reps.'},
+ row:{name:'Barbell row',sets:5,reps:5,inc:2.5,failInc:1.25,rest:150,tip:'Hinge at the hips and keep your torso stable.'}
+};
+const workouts={A:['squat','bench','deadlift'],B:['squat','press','row']};
+function loadState(){try{const x=JSON.parse(localStorage.getItem(DBKEY));if(x&&x.settings&&Array.isArray(x.sessions))return {...structuredClone(defaultState),...x,settings:{...defaultState.settings,...x.settings,starts:{...defaultState.settings.starts,...(x.settings.starts||{})}},loads:{...defaultState.loads,...x.loads},failures:{...defaultState.failures,...x.failures}}}catch(e){}return structuredClone(defaultState)}
+function persist(){localStorage.setItem(DBKEY,JSON.stringify(state))}
+function fmt(n){const unit=state.settings.units;let val=Number(n);if(unit==='lb')val*=2.2046226218;return (Math.round(val*10)/10).toLocaleString(undefined,{maximumFractionDigits:1})+' '+unit}
+function toUnit(kg){return state.settings.units==='lb'?kg*2.2046226218:kg}
+function fromUnit(n){return state.settings.units==='lb'?n/2.2046226218:n}
+function roundLoad(n){const step=state.settings.increment*2;return Math.max(0,Math.round(n/step)*step)}
+function showToast(s){const t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+function showScreen(name){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('active',x.id===name));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.screen===name));if(name==='home')renderHome();if(name==='history')renderHistory();if(name==='settings')renderSettings();if(name==='workout'&&!activeSession)beginWorkout();window.scrollTo(0,0)}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
+function renderHome(){ $('nextWorkout').textContent='Workout '+state.next;$('homeTitle').textContent='Ready when you are';$('homeDesc').textContent='Your next session is queued. Lift with control; progress follows consistency.';$('sessionCount').textContent=state.sessions.length;$('historyCount').textContent=state.sessions.length;$('streakCount').textContent=state.sessions.length?Math.min(state.sessions.length,7):0;}
+function beginWorkout(){activeSession={id:Date.now(),type:state.next,date:new Date().toISOString(),entries:{},note:''};workouts[activeSession.type].forEach(k=>activeSession.entries[k]={weight:state.loads[k],completed:Array(exercises[k].sets).fill(null)});renderWorkout();document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('active',x.id==='workout'));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.screen==='workout'))}
+function renderWorkout(){if(!activeSession)return;$('workoutHeading').textContent='Workout '+activeSession.type;$('workoutSubtitle').textContent=activeSession.type==='A'?'Squat · Bench press · Deadlift':'Squat · Overhead press · Barbell row';$('exerciseList').innerHTML='';
+workouts[activeSession.type].forEach(key=>{const ex=exercises[key],entry=activeSession.entries[key];const div=document.createElement('div');div.className='exercise';div.innerHTML=`<div class="exercise-top"><div><h3>${ex.name}</h3><p class="small">${ex.sets} sets × ${ex.reps} reps · Rest ${Math.round(ex.rest/60)} min</p></div><span class="tag">${key==='deadlift'?'1×5':'MAIN LIFT'}</span></div><div class="controls"><button aria-label="Decrease weight" data-action="minus" data-key="${key}">−</button><div class="weight">${fmt(entry.weight)}</div><button aria-label="Increase weight" data-action="plus" data-key="${key}">+</button><span class="small muted">total</span></div><p class="small">${ex.tip}</p><div class="sets">${entry.completed.map((v,i)=>`<button class="setbox ${v!==null?'done':''}" data-action="set" data-key="${key}" data-set="${i}">${v===null?'Set '+(i+1):v+'/'+ex.reps+' reps'}</button>`).join('')}</div><p class="small muted">Tap each set after completing it. If you miss reps, record the reps actually completed.</p>`;$('exerciseList').appendChild(div)});
+$('exerciseList').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const key=b.dataset.key,entry=activeSession.entries[key];if(b.dataset.action==='minus')entry.weight=roundLoad(Math.max(0,entry.weight-state.settings.increment*2));if(b.dataset.action==='plus')entry.weight=roundLoad(entry.weight+state.settings.increment*2);if(b.dataset.action==='set'){const i=Number(b.dataset.set),current=entry.completed[i];const ans=prompt(`Set ${i+1}: how many reps did you complete? Target: ${exercises[key].reps}`,current===null?String(exercises[key].reps):String(current));if(ans===null)return;const reps=Number(ans);if(!Number.isInteger(reps)||reps<0||reps>30){showToast('Enter a valid number of reps');return}entry.completed[i]=reps}renderWorkout()}))}
+function finishWorkout(){if(!activeSession)return;activeSession.note=$('sessionNote').value.trim();let missed=[];workouts[activeSession.type].forEach(k=>{const ex=exercises[k],e=activeSession.entries[k];const complete=e.completed.every(n=>n!==null&&n>=ex.reps);if(complete){state.loads[k]=roundLoad(e.weight+ex.inc);state.failures[k]=0}else{state.loads[k]=e.weight;state.failures[k]=(state.failures[k]||0)+1;missed.push(ex.name)}});activeSession.finishedAt=new Date().toISOString();state.sessions.unshift(activeSession);state.next=state.next==='A'?'B':'A';persist();activeSession=null;$('sessionNote').value='';renderHome();showScreen('history');showToast(missed.length?`Saved. Repeat load for: ${missed.join(', ')}`:'Saved! Loads increased for next time.')}
+function renderHistory(){$('historyCount').textContent=state.sessions.length;$('lastWorkout').textContent=state.sessions.length?'Workout '+state.sessions[0].type:'—';const list=$('historyList');if(!state.sessions.length){list.innerHTML='<p>No sessions yet. Your first workout will appear here.</p>';return}list.innerHTML=state.sessions.slice(0,20).map(s=>`<div class="listitem"><div class="row"><strong>Workout ${s.type}</strong><span class="small muted">${new Date(s.finishedAt||s.date).toLocaleDateString()}</span></div>${Object.entries(s.entries).map(([k,e])=>`<p class="small">${exercises[k].name}: ${fmt(e.weight)} · ${e.completed.filter(n=>n!==null&&n>=exercises[k].reps).length}/${exercises[k].sets} sets met target</p>`).join('')}${s.note?`<p class="small">Note: ${escapeHtml(s.note)}</p>`:''}</div>`).join('')}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderSettings(){const s=state.settings;$('units').value=s.units;$('barWeight').value=toUnit(s.barWeight);$('increment').value=toUnit(s.increment);$('squatStart').value=toUnit(s.starts.squat);$('benchStart').value=toUnit(s.starts.bench);$('pressStart').value=toUnit(s.starts.press);$('deadStart').value=toUnit(s.starts.deadlift);$('rowStart').value=toUnit(s.starts.row);document.querySelectorAll('.unitLabel').forEach(x=>x.textContent=s.units)}
+$('units').addEventListener('change',()=>{const old=state.settings.units;const newU=$('units').value;const cv=n=>newU==='lb'&&old==='kg'?n*2.2046226218:newU==='kg'&&old==='lb'?n/2.2046226218:n;['barWeight','increment','squatStart','benchStart','pressStart','deadStart','rowStart'].forEach(id=>$(id).value=Math.round(cv(Number($(id).value))*100)/100);document.querySelectorAll('.unitLabel').forEach(x=>x.textContent=newU)});
+$('saveSettings').addEventListener('click',()=>{const oldUnit=state.settings.units,newUnit=$('units').value;const cv=id=>fromUnit(Number($(id).value));state.settings={units:newUnit,barWeight:cv('barWeight'),increment:cv('increment'),starts:{squat:cv('squatStart'),bench:cv('benchStart'),press:cv('pressStart'),deadlift:cv('deadStart'),row:cv('rowStart')}};if(!state.sessions.length){state.loads={...state.settings.starts}}else{Object.keys(state.loads).forEach(k=>{if(state.loads[k]===defaultState.loads[k])state.loads[k]=state.settings.starts[k]})}persist();renderHome();showToast('Settings saved')});
+$('startBtn').addEventListener('click',()=>showScreen('workout'));
+$('cancelBtn').addEventListener('click',()=>{if(confirm('Discard this uncompleted session?')){activeSession=null;showScreen('home')}});
+$('finishBtn').addEventListener('click',()=>{if(!activeSession)return;const unanswered=Object.entries(activeSession.entries).some(([k,e])=>e.completed.some(v=>v===null));if(unanswered&&!confirm('Some sets have not been logged. Save this session anyway?'))return;finishWorkout()});
+$('timerStart').addEventListener('click',()=>{if(timerInterval){clearInterval(timerInterval);timerInterval=null}$('timerStart').textContent='Timer running…';timerInterval=setInterval(()=>{timerRemaining--;updateTimer();if(timerRemaining<=0){clearInterval(timerInterval);timerInterval=null;$('timerStart').textContent='Start 2 min';showToast('Rest complete — next set when ready')}},1000)});
+$('timerReset').addEventListener('click',()=>{if(timerInterval)clearInterval(timerInterval);timerInterval=null;timerRemaining=120;updateTimer();$('timerStart').textContent='Start 2 min'});
+function updateTimer(){$('timerText').textContent=String(Math.floor(timerRemaining/60)).padStart(2,'0')+':'+String(timerRemaining%60).padStart(2,'0')}
+$('exportBtn').addEventListener('click',exportBackup);
+function exportBackup(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ironstart-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showToast('Backup exported')}
+$('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!d.settings||!Array.isArray(d.sessions)||!d.loads)throw new Error();if(!confirm('Replace the current workout data with this backup?'))return;state={...structuredClone(defaultState),...d};persist();renderHome();renderHistory();renderSettings();showToast('Backup restored')}catch(err){alert('That file does not look like an IronStart backup.')}e.target.value=''});
+$('resetBtn').addEventListener('click',()=>{if(confirm('Permanently delete all local workout data? Export a backup first if you want to keep it.')){state=structuredClone(defaultState);persist();activeSession=null;renderHome();renderHistory();renderSettings();showToast('Local data deleted')}});
+renderHome();renderHistory();renderSettings();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "IronStart Workout Planner",
+  "short_name": "IronStart",
+  "description": "Offline-first beginner barbell workout planner",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101713",
+  "theme_color": "#101713",
+  "orientation": "portrait",
+  "icons": []
+}
